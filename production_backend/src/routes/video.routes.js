@@ -1,7 +1,7 @@
 import { upload } from "../middlewares/multer.middleware.js";
 import authMiddleware from "../middlewares/auth.middlewares.js"
 import { Router } from "express";
-import { publishAVideo , getVideoById, updateVideo, deleteVideo} from "../controllers/video.controller.js";
+import { publishAVideo , getVideoById, updateVideo, deleteVideo, getAllVideo} from "../controllers/video.controller.js";
 
 const videoRouter=Router()
 videoRouter.use(authMiddleware)
@@ -18,9 +18,12 @@ videoRouter.route("/").post(
         }
     ])
     ,publishAVideo)
-    .get(getVideoById)
-    .patch(upload.single("thumbnail"),updateVideo)
+    .get(getAllVideo)
+
+videoRouter.route("/videoid").get(getVideoById)
+    .post(upload.single("thumbnail"),updateVideo)
     .delete(deleteVideo)
+    
 
 
 

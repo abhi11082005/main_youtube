@@ -1,9 +1,11 @@
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {ApiError} from "../utils/apiError.js"
 import { Video } from "../models/video.model.js"
+import {User} from "../models/user.models.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { uploadOnCloudinary , deleteFromCloudinary } from "../utils/cloudinary.js"
-import mongoose,{isValidObjectId} from "mongoose"
+import mongoose,{isValidObjectId } from "mongoose"
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
 
 const publishAVideo = asyncHandler(async (req, res) => {
     const { title, description} = req.body
@@ -130,12 +132,52 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     
 })
 
-
+const getAllVideo = asyncHandler(async (req,res) =>{
+    const {
+        page=1,
+        query="abhi",
+        limit=10,
+        sortedBy="createdAt",
+        sortType=1,
+    } = req.query
+    const user=await User.findById({_id:req.user?._id})
+    if(!user) throw new ApiError(401, "user not found in getAllVideo")
+    const userId=user._id
+    let skip=( page-1 )*limit
+    // const videos= await Video.findOne({owner:user})
+    const videosAggregation= await Video.aggregate(
+        [
+            {$match:{owner:(userId)}},
+            {$match:{
+                $or:[
+                    { title:{$regex:query , $options:'i'} },
+                    {description:{$regex:query , $options:'i'} }
+                ]   
+            }},
+            {
+                $sort:{ [sortedBy]:Number(sortType) }
+            },
+            {$skip:Number(skip)},
+            {$limit:Number(limit)}
+        ]
+    )
+    console.log(videosAggregation)
+     Video.aggregatePaginate(videosAggregation,{page,skip})
+    .then((result)=>{
+        return res.status(200)
+        .json(new ApiResponse(200,result,"Successfully data fetched"))    
+    })
+    .catch((error)=>{
+        console.log(error,"error found in aggregatePaginate of getAllVideo")
+        throw error
+    }) 
+})
 export {
     publishAVideo,
     getVideoById,
     updateVideo,
     deleteVideo,
-    togglePublishStatus
+    togglePublishStatus,
+    getAllVideo
 
 }

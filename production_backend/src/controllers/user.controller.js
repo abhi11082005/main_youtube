@@ -97,7 +97,7 @@ const loginUser=asyncHandler(async(req,res)=>{
     }
     if(!password) {throw new ApiError(400,"password not found");
     }
-
+    console.log(email,"      ",password)
     const user=await User.findOne({
         $or:[{email},{username}]
     })
@@ -131,6 +131,7 @@ const loginUser=asyncHandler(async(req,res)=>{
             "User succesfully logged in"
         )
     )
+    
 })
 
 const logoutUser=asyncHandler(async(req,res)=>{
@@ -265,6 +266,7 @@ const updateUserAvatar=asyncHandler(async(req,res)=>{
     .status(200)
     .json( new ApiResponse(200,newAvatar,"updated Successfully"))
 })
+
 const updateUserCoverImage=asyncHandler(async(req,res)=>{
     const user=await User.findById(req.user?._id)
     // console.log(user)
@@ -282,6 +284,7 @@ const updateUserCoverImage=asyncHandler(async(req,res)=>{
     .status(200)
     .json(new ApiResponse(200,coverImage,"coverImage updated successfully"))
 })
+
 const getUserChannelProfile=asyncHandler(async(req,res)=>{
     const {username}=req.params
 
@@ -347,6 +350,46 @@ const getUserChannelProfile=asyncHandler(async(req,res)=>{
             new ApiResponse(200, channel[0], "User channel fetched successfully")
         )
 })
+
+const getWatchHistory = asyncHandler( async(req,res) => {
+    const watchHistory = await User.aggregate[
+        {
+            $match:req.user?._id
+        },
+        {
+            $lookup : {
+                from: "videos",
+                localField:"watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                pipeline : [
+                    {
+                        $lookup : {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as:"owner",
+                            pipeline : [
+                                {
+                                    $project: {
+                                        fullName:1,
+                                        username:1,
+                                        avatar:1
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+    if(!watchHistory) throw new ApiError(401,"watch history not created in getWatchHistory")
+    res
+    .status(200)
+    .json(new ApiResponse(201,watchHistory,"successfully watch History created"))
+})
+
 export {registerUser,
         loginUser,
         logoutUser,
@@ -356,5 +399,7 @@ export {registerUser,
         updateAccountDetail,
         updateUserAvatar,
         updateUserCoverImage,
-        getUserChannelProfile
+        getUserChannelProfile,
+        getWatchHistory
+        
 }

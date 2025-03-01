@@ -5,7 +5,7 @@ import {ApiResponse} from "../utils/apiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
-    const {videoId} = req.params
+    const {videoId} = req.query
     //TODO: toggle like on video
 })
 

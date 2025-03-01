@@ -19,6 +19,12 @@ import userRouter from "./routes/user.routes.js"
 app.use("/users",userRouter)
 import videoRouter from "./routes/video.routes.js"
 app.use("/video",videoRouter)
+import subscriptionRouter from "./routes/subscription.routes.js"
+app.use("/subscription",subscriptionRouter)
+import playlistRouter from "./routes/playlist.routes.js"
+app.use("/playlist",playlistRouter)
+import commentRouter from "./routes/comment.routes.js"
+app.use("/comment",commentRouter)
 // //routes import
 // import userRouter from "./routes/user.routes.js"
 

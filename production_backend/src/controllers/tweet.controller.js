@@ -11,7 +11,7 @@ const createTweet = asyncHandler(async (req, res) => {
     if(!content) throw new ApiError(401,"content not exist in createTweet")
     
     const tweet = await Tweet.create({
-        owner:req.user._id,
+        owner:req.user?._id,
         content:content
     })
     if(!tweet) throw new ApiError(401,"tweet not found in createTweet")
