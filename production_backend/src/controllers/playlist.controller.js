@@ -38,7 +38,23 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
 
     if(req.user?._id.toString() !== findPlaylist.owner.toString()) throw new ApiError(401,"Unauthorized validation in getUserPlaylist")
     
-    
+    const allAutherizedUserPlaylist= await Playlist.aggregate([
+        {
+          $match: {
+            owner: userId,
+          },
+        },
+        {
+          $project: {
+              name:1
+          }
+        }
+      ] )
+
+
+      return res.status(200)
+      .json( new ApiResponse(200,allAutherizedUserPlaylist,"successfully found all playlist"))
+
 })
 
 const getPlaylistById = asyncHandler(async (req, res) => {
